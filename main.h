@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // Windows size
 #define WINX 640
@@ -88,6 +89,9 @@ struct App {
   bool redraw;
   bool quit;
 };
+
+// If test false, print description and exit
+void must_init(bool test, const char *description);
 
 // Clears IPAdress at pointer ip
 void clear_ip(struct IPAddr* ip);

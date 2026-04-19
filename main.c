@@ -2,6 +2,14 @@
 
 struct App app;
 
+void must_init(bool test, const char *description)
+{
+    if(test) return;
+
+    printf("couldn't initialize %s\n", description);
+    exit(1);
+}
+
 void clear_ip(struct IPAddr* ip) {
   ip->a = 0;
   ip->b = 0;
@@ -95,27 +103,6 @@ void calcNetHosts() {
     app.hosts = pow(2, 32 - app.sub) - 2;
 }
 
-void draw_ustr_ml(ALLEGRO_FONT* font, ALLEGRO_COLOR color, float x, float y, float line_height, int flags, ALLEGRO_USTR* ustr) {
-  ALLEGRO_USTR* line;
-  int start_pos = 0;
-  int end_pos = 0;
-  int i = 0;
-  
-  for(;; i++) {
-    end_pos = al_ustr_find_chr(ustr, start_pos, '\n');
-    if(end_pos < 0) break;
-    
-    line = al_ustr_dup_substr(ustr, start_pos, end_pos);
-    start_pos = end_pos + 1;
-
-    al_draw_ustr(font, color, x, y + line_height * i, flags, line);
-  }
-  line = al_ustr_dup_substr(ustr, start_pos, al_ustr_size(ustr));
-  al_draw_ustr(font, color, x, y + line_height * i, flags, line);
-  
-  al_ustr_free(line);
-}
-
 void draw_message() {
   al_draw_text(app.font, COLOR, MESSAGE_LEFT, MESSAGE_TOP, 0, MESSAGE);
 }
@@ -131,21 +118,23 @@ void draw_result() {
                   app.netid.a, app.netid.b, app.netid.c, app.netid.d,
                   app.net.a, app.net.b, app.net.c, app.net.d,
                   app.hosts);
-  draw_ustr_ml(app.font, COLOR, RESULT_LEFT, RESULT_TOP, LINE_HEIGHT, 0, app.result);
+  al_draw_multiline_ustr(app.font, COLOR, RESULT_LEFT, RESULT_TOP, WINX - 2 * RESULT_LEFT, LINE_HEIGHT, 0, app.result);
 }
 
 int main() {
-  al_init();
-  al_init_ttf_addon();
-  al_init_primitives_addon();
-  al_install_keyboard();
-
-  init_app();
+  must_init(al_init(), "al_init()");
+  must_init(al_init_ttf_addon(), "al_init_ttf_addon()");
+  must_init(al_init_primitives_addon(), "al_init_primitives_addon()");
+  must_init(al_install_keyboard(), "al_install_keyboard()");
 
   ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
+  must_init(queue, "queue");
   ALLEGRO_DISPLAY* disp = al_create_display(WINX, WINY);
+  must_init(disp, "display");
   app.font = al_load_ttf_font(TTF_PATH, FONT_SIZE, 0);
-  
+  must_init(app.font, "font file");
+ 
+  init_app(); 
 
   al_register_event_source(queue, al_get_keyboard_event_source());
   al_register_event_source(queue, al_get_display_event_source(disp));
